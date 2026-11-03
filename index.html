@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ku" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>حساباتی مەسرەف</title>
+    <style>
+        body { font-family: system-ui, -apple-system, sans-serif; background: #f0f2f5; padding: 15px; direction: rtl; margin: 0; }
+        .container { max-width: 600px; margin: auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+        h2 { text-align: center; color: #1e293b; margin-top: 0; font-size: 20px; }
+        .input-group { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+        input { padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 16px; outline: none; }
+        input:focus { border-color: #2563eb; }
+        button.add-btn { background: #16a34a; color: white; border: none; padding: 12px; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th, td { border-bottom: 1px solid #e2e8f0; padding: 10px; text-align: center; font-size: 14px; }
+        th { background: #f8fafc; color: #475569; }
+        .total-box { margin-top: 20px; padding: 15px; background: #dcfce7; border-radius: 8px; font-size: 17px; font-weight: bold; color: #15803d; display: flex; justify-content: space-between; }
+        .del-btn { background: #ef4444; color: white; border: none; padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 12px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>حساباتی نۆژەنکردنەوەی دوکان</h2>
+    
+    <div class="input-group">
+        <input type="text" id="itemName" placeholder="ناوی مەسرەف (بۆ نموونە: تەختەی کاوانتەر)">
+        <input type="number" id="itemPrice" placeholder="نرخ بە ژمارە (بۆ نموونە: 45000)">
+        <button class="add-btn" onclick="addItem()">زیادکردن</button>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>ناوی مەسرەف</th>
+                <th>نرخ</th>
+                <th>سڕینەوە</th>
+            </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+    </table>
+
+    <div class="total-box">
+        <span>کۆی گشتی:</span>
+        <span id="totalAmount">0</span>
+    </div>
+</div>
+
+<script>
+    let expenses = JSON.parse(localStorage.getItem('shop_expenses')) || [];
+
+    function updateUI() {
+        const tbody = document.getElementById('tableBody');
+        tbody.innerHTML = '';
+        let total = 0;
+
+        expenses.forEach((item, index) => {
+            total += parseFloat(item.price);
+            tbody.innerHTML += `
+                <tr>
+                    <td>${index + 1}</td>
+                    <td>${item.name}</td>
+                    <td>${Number(item.price).toLocaleString()}</td>
+                    <td><button class="del-btn" onclick="deleteItem(${index})">سڕینەوە</button></td>
+                </tr>
+            `;
+        });
+
+        document.getElementById('totalAmount').innerText = total.toLocaleString();
+        localStorage.setItem('shop_expenses', JSON.stringify(expenses));
+    }
+
+    function addItem() {
+        const name = document.getElementById('itemName').value.trim();
+        const price = document.getElementById('itemPrice').value;
+
+        if (!name || !price || price <= 0) {
+            alert('تکایە ناوی کەرەستە و نرخەکەی بنووسە!');
+            return;
+        }
+
+        expenses.push({ name, price: parseFloat(price) });
+        document.getElementById('itemName').value = '';
+        document.getElementById('itemPrice').value = '';
+        updateUI();
+    }
+
+    function deleteItem(index) {
+        if(confirm('دڵنیایت لە سڕینەوە؟')) {
+            expenses.splice(index, 1);
+            updateUI();
+        }
+    }
+
+    updateUI();
+</script>
+</body>
+</html>
