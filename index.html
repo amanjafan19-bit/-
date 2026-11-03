@@ -6,28 +6,44 @@
     <title>حساباتی مەسرەف</title>
     
     <link rel="manifest" href="./manifest.json">
-    <link rel="icon" type="image/png" href="https://upload.wikimedia.org/wikipedia/commons/1/11/LineageOS_21_Calculator_icon.png">
-    <link rel="apple-touch-icon" href="https://upload.wikimedia.org/wikipedia/commons/1/11/LineageOS_21_Calculator_icon.png">
+    <link rel="icon" type="image/png" href="https://upload.wikimedia.org/wikipedia/commons/thumb/6/60/Circle-icons-money.svg/512px-Circle-icons-money.svg.png">
+    <link rel="apple-touch-icon" href="https://upload.wikimedia.org/wikipedia/commons/thumb/6/60/Circle-icons-money.svg/512px-Circle-icons-money.svg.png">
     
     <meta name="theme-color" content="#16a34a">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
 
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
+
     <style>
-        body { font-family: system-ui, -apple-system, sans-serif; background: #f0f2f5; padding: 15px; direction: rtl; margin: 0; }
-        .container { max-width: 600px; margin: auto; background: white; padding: 20px; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.06); }
-        .header { text-align: center; margin-bottom: 20px; }
-        .header h2 { color: #1e293b; margin: 5px 0; font-size: 20px; }
+        body { font-family: system-ui, -apple-system, sans-serif; background: #f0f2f5; padding: 12px; direction: rtl; margin: 0; user-select: none; }
+        .container { max-width: 600px; margin: auto; background: white; padding: 18px; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.06); }
+        .header { text-align: center; margin-bottom: 15px; }
+        .header h2 { color: #1e293b; margin: 0; font-size: 20px; }
         .input-group { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
-        input { padding: 14px; border: 1px solid #cbd5e1; border-radius: 10px; font-size: 16px; outline: none; }
+        input { padding: 13px; border: 1px solid #cbd5e1; border-radius: 10px; font-size: 15px; outline: none; }
         input:focus { border-color: #16a34a; }
-        button.add-btn { background: #16a34a; color: white; border: none; padding: 14px; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; }
+        button.add-btn { background: #16a34a; color: white; border: none; padding: 13px; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; }
         button.add-btn:active { background: #15803d; }
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-        th, td { border-bottom: 1px solid #e2e8f0; padding: 12px 8px; text-align: center; font-size: 15px; }
+        
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { border-bottom: 1px solid #e2e8f0; padding: 12px 4px; text-align: center; font-size: 14px; }
         th { background: #f8fafc; color: #475569; }
+        
+        .drag-handle { cursor: grab; font-size: 18px; color: #94a3b8; padding: 0 5px; touch-action: none; }
+        .sortable-ghost { background-color: #dcfce7 !important; opacity: 0.7; }
+
+        .actions { display: flex; gap: 6px; justify-content: center; align-items: center; }
+        .edit-btn { background: #e0f2fe; color: #0284c7; border: none; padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: bold; }
+        .del-btn { background: #fee2e2; color: #dc2626; border: none; padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: bold; }
+
         .total-box { margin-top: 25px; padding: 16px; background: #dcfce7; border-radius: 12px; font-size: 18px; font-weight: bold; color: #15803d; display: flex; justify-content: space-between; }
-        .del-btn { background: #fee2e2; color: #dc2626; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: bold; }
+
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; }
+        .modal-content { background: white; padding: 22px; border-radius: 14px; width: 85%; max-width: 400px; display: flex; flex-direction: column; gap: 12px; }
+        .modal-buttons { display: flex; gap: 10px; margin-top: 5px; }
+        .save-btn { background: #16a34a; color: white; border: none; padding: 10px; border-radius: 8px; flex: 1; font-weight: bold; font-size: 15px; cursor: pointer; }
+        .cancel-btn { background: #94a3b8; color: white; border: none; padding: 10px; border-radius: 8px; flex: 1; font-weight: bold; font-size: 15px; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -38,7 +54,7 @@
     </div>
     
     <div class="input-group">
-        <input type="text" id="itemName" placeholder="ناوی مەسرەف (بۆ نموونە: تەختەی کاوانتەر)">
+        <input type="text" id="itemName" placeholder="ناوی مەسرەف...">
         <input type="number" id="itemPrice" placeholder="نرخ بە ژمارە (بۆ نموونە: 45000)">
         <button class="add-btn" onclick="addItem()">زیادکردن</button>
     </div>
@@ -46,10 +62,10 @@
     <table>
         <thead>
             <tr>
-                <th style="width: 10%;">#</th>
-                <th style="width: 50%;">ناوی مەسرەف</th>
+                <th style="width: 15%;">#</th>
+                <th style="width: 45%;">ناوی مەسرەف</th>
                 <th style="width: 25%;">نرخ</th>
-                <th style="width: 15%;">سڕینەوە</th>
+                <th style="width: 15%;">کردار</th>
             </tr>
         </thead>
         <tbody id="tableBody"></tbody>
@@ -61,6 +77,18 @@
     </div>
 </div>
 
+<div id="editModal" class="modal">
+    <div class="modal-content">
+        <h3 style="margin: 0; text-align: center; color: #1e293b;">دەستکاریکردنی مەسرەف</h3>
+        <input type="text" id="editName" placeholder="ناوی نوێ">
+        <input type="number" id="editPrice" placeholder="نرخی نوێ">
+        <div class="modal-buttons">
+            <button class="save-btn" onclick="saveEdit()">پاشەکەوتکردن</button>
+            <button class="cancel-btn" onclick="closeModal()">داخستن</button>
+        </div>
+    </div>
+</div>
+
 <script>
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
@@ -69,6 +97,7 @@
     }
 
     let expenses = JSON.parse(localStorage.getItem('shop_expenses')) || [];
+    let editIndex = null;
 
     function updateUI() {
         const tbody = document.getElementById('tableBody');
@@ -78,11 +107,19 @@
         expenses.forEach((item, index) => {
             total += parseFloat(item.price);
             tbody.innerHTML += `
-                <tr>
-                    <td>${index + 1}</td>
-                    <td>${item.name}</td>
+                <tr data-id="${index}">
+                    <td>
+                        <span class="drag-handle">☰</span>
+                        ${index + 1}
+                    </td>
+                    <td style="font-weight: 500;">${item.name}</td>
                     <td>${Number(item.price).toLocaleString()}</td>
-                    <td><button class="del-btn" onclick="deleteItem(${index})">سڕینەوە</button></td>
+                    <td>
+                        <div class="actions">
+                            <button class="edit-btn" onclick="openEdit(${index})">✏️</button>
+                            <button class="del-btn" onclick="deleteItem(${index})">سڕینەوە</button>
+                        </div>
+                    </td>
                 </tr>
             `;
         });
@@ -90,6 +127,18 @@
         document.getElementById('totalAmount').innerText = total.toLocaleString() + ' دینار';
         localStorage.setItem('shop_expenses', JSON.stringify(expenses));
     }
+
+    const tbody = document.getElementById('tableBody');
+    new Sortable(tbody, {
+        handle: '.drag-handle',
+        animation: 200,
+        ghostClass: 'sortable-ghost',
+        onEnd: function (evt) {
+            const movedItem = expenses.splice(evt.oldIndex, 1)[0];
+            expenses.splice(evt.newIndex, 0, movedItem);
+            updateUI();
+        }
+    });
 
     function addItem() {
         const name = document.getElementById('itemName').value.trim();
@@ -111,6 +160,32 @@
             expenses.splice(index, 1);
             updateUI();
         }
+    }
+
+    function openEdit(index) {
+        editIndex = index;
+        document.getElementById('editName').value = expenses[index].name;
+        document.getElementById('editPrice').value = expenses[index].price;
+        document.getElementById('editModal').style.display = 'flex';
+    }
+
+    function saveEdit() {
+        const newName = document.getElementById('editName').value.trim();
+        const newPrice = document.getElementById('editPrice').value;
+
+        if (!newName || !newPrice || newPrice <= 0) {
+            alert('تکایە ناو و نرخ بە تەواوی بنووسە!');
+            return;
+        }
+
+        expenses[editIndex] = { name: newName, price: parseFloat(newPrice) };
+        closeModal();
+        updateUI();
+    }
+
+    function closeModal() {
+        document.getElementById('editModal').style.display = 'none';
+        editIndex = null;
     }
 
     updateUI();
