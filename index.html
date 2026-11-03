@@ -5,8 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>حساباتی مەسرەف</title>
     
-    <!-- بەستنەوە بە فایلی ئەپڵیکەیشن (PWA) -->
-    <link rel="manifest" href="manifest.json">
+    <link rel="manifest" href="./manifest.json">
+    <link rel="icon" type="image/png" href="https://upload.wikimedia.org/wikipedia/commons/1/11/LineageOS_21_Calculator_icon.png">
+    <link rel="apple-touch-icon" href="https://upload.wikimedia.org/wikipedia/commons/1/11/LineageOS_21_Calculator_icon.png">
+    
     <meta name="theme-color" content="#16a34a">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -60,9 +62,10 @@
 </div>
 
 <script>
-    // چالاککردنی دابەزاندنی ئەپ (PWA)
     if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('sw.js');
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('./sw.js', { scope: './' });
+        });
     }
 
     let expenses = JSON.parse(localStorage.getItem('shop_expenses')) || [];
